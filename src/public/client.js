@@ -4,15 +4,15 @@ let store = {
 	rovers: ["Curiosity", "Opportunity", "Spirit"],
 	roverName: "",
 	roverImages: [],
-	roverInfo: {},
+	roverInfo: "",
 };
 
 // add our markup to the page
 const root = document.getElementById("root");
 
-const updateStore = (store, newState) => {
-	store = Object.assign(store, newState);
-	render(root, store);
+const updateStore = (state, newState) => {
+	state = Object.assign(state, newState);
+	render(root, state);
 };
 
 const render = async (root, state) => {
@@ -25,14 +25,14 @@ const App = (state) => {
 	console.log(state);
 	return `
         <div class="bg-dark bg-space">
-            <header>
+            <header class="container">
                 <nav>
                     ${Nav(rovers, roverImages)}
                 </nav>
             </header>
             <main class="container text-light">
+
                 ${Greeting(user.name)}
-                
                 <section>
                     ${ImageOfTheDay(apod)}
                 </section>
@@ -88,33 +88,53 @@ const ImageOfTheDay = (apod) => {
 };
 
 const Nav = (rovers, roverImages) => {
-    if (roverImages.length > 0 ) {
-        return (`<button onclick='clearRoverData()'>Back to Main Page</button>`)
-    } else {
-        return Buttons(rovers);
-    }
-}
-
-const Buttons = (rovers) => {
-	return rovers
-		.map((rover) => {
-			return `
-            <button id=${rover.toLowerCase()} class="btn btn-primary" onclick="updateRover('${rover.toLowerCase()}')">${rover}</button>
-        `;
-		})
-		.join("");
+	if (roverImages.length > 0) {
+		return `<button onclick='clearRoverData()'>Back to Main Page</button>`;
+	} else {
+		return Buttons(rovers).join("");
+	}
 };
 
+//HOF that return other fn
+const Buttons = (rovers) => {
+	return rovers.map((rover) => generateElement(rover, Button));
+};
+
+const Button = (rover) => {
+	return `
+            <button id="${rover.toLowerCase()}" class="btn btn-primary" onclick="updateRover('${rover.toLowerCase()}')">${rover}</button>
+        `;
+};
+
+const Images = (images) => {
+    return images.map(image => generateElement(image, Img))
+}
+
+const Img = (image) => {
+    return `<img src="${image.img_src}" alt="Made with ${image.camera.full_name} at ${image.earth_date}"/>`
+}
+
+const Slider = (images) => {
+    return (`
+        <div id="slider">
+            ${Images(images)}
+        </div>
+    `)
+}
+
+//HOF THAT takes callback fn
+const generateElement = (data, callback) => {
+	return callback(data);
+};
 
 const updateRover = (rover) => {
-    getRoverImages(rover);
-    getRoverDetails(rover);
-}
+	getRoverImages(rover);
+	//getRoverDetails(rover);
+};
 
 const clearRoverData = () => {
-    updateStore(store, {roverImages: []})
-    updateStore(store, { roverInfo: {} });
-}
+	updateStore(store, { roverImages: [], roverInfo: {} });
+};
 
 // ------------------------------------------------------  API CALLS
 
@@ -128,9 +148,18 @@ const getImageOfTheDay = (state) => {
 const getRoverImages = (name) => {
 	fetch(`http://localhost:3000/rover/${name}/images`)
 		.then((res) => {
-            return res.json()})
+			return res.json();
+		})
 		.then((roverImages) => {
-			updateStore(store, { roverImages });
+			fetch(`http://localhost:3000/rover/${name}/info`)
+				.then((res) => res.json())
+				.then((roverInfo) =>
+					updateStore(store, {
+						roverImages,
+						roverInfo: roverInfo.photo_manifest,
+					})
+				);
+			//updateStore(store, { roverImages });
 		});
 };
 
