@@ -17,6 +17,16 @@ const updateStore = (state, newState) => {
 
 const render = async (root, state) => {
 	root.innerHTML = App(state);
+
+    let slider = document.getElementById('slider');
+    if (slider) {
+        //jquery needed for slider JS
+        $('#slider').slick({
+            infinite: true,
+            slidesToShow: 1,
+            slidesToScroll:1
+        });
+    }
 };
 
 // create content
@@ -76,9 +86,11 @@ const ImageOfTheDay = (apod) => {
             `;
 		} else {
 			return `
-                <img src="${apod.image.url}" alt="${apod.image.title}" class="apod-image" />
-                <h2>${apod.image.title}</h2>
-                <p class="m-0">${apod.image.explanation}</p>
+                <h2 class="text-center mt-5">Photo of the Day: ${apod.image.title}</h2>
+                <figure class="figure">
+                    <img src="${apod.image.url}" alt="${apod.image.title}" class="apod-image figure-img" />
+                    <figcaption class="figure-caption text-light">${apod.image.explanation}</figcaption>
+                </figure>
             `;
 		}
 	}
@@ -89,7 +101,7 @@ const Nav = (state) => {
 		return `<button onclick='clearRoverData()' class="btn btn-light">Back to the Image of the Day</button>`;
 	} else {
 		return `
-        <h5>Choose a rover to see its images</h5>
+        <h5>Choose a rover to see images</h5>
         <nav>
             ${Buttons(state.rovers).join("")}
         </nav>
@@ -140,10 +152,10 @@ const ModalForm = (state) => {
 	return `
      <div class="modal-wrapper fade show d-block">
         <div class="modal-dialog-centered w-100 justify-content-center">
-                <form class="d-flex flex-column bg-light p-4" onsubmit="updateName(event)">
-                    <label for="name" class="">Enter Your Name</label>
-                    <input type="text" id="name" name="name" placeholder="Niel Armstrong" class="my-3" tabindex="1">
-                    <button type="Submit">Go to Space</button>
+                <form class="d-flex flex-column bg-light p-4 card" onsubmit="updateName(event)">
+                    <label for="name" class="">Enter Your Name, Astronaut</label>
+                    <input type="text" id="name" name="name" placeholder="Niel Armstrong" class="my-3" tabindex="1" required>
+                    <button type="Submit" class="btn btn-dark">Go to Space</button>
                 </form>
         </div>
     </div>   
@@ -166,8 +178,8 @@ const clearRoverData = () => {
 const updateName = (e) => {
 	e.preventDefault();
 	let user = { name: e.target.querySelector("#name").value };
-	
-		updateStore(store, { user });
+
+	updateStore(store, { user });
 };
 
 // ------------------------------------------------------  API CALLS
