@@ -21,22 +21,19 @@ const render = async (root, state) => {
 
 // create content
 const App = (state) => {
-	let { rovers, apod, user, roverImages } = state;
 	console.log(state);
 	return `
         <div class="bg-dark bg-space">
             <header class="container">
                 <nav>
-                    ${Nav(rovers, roverImages)}
+                    ${Nav(state.rovers, state.roverImages)}
                 </nav>
             </header>
             <main class="container text-light">
-
-                ${Greeting(user.name)}
-                <section>
-                    ${ImageOfTheDay(apod)}
-                </section>
+                ${Main(state)}
             </main>
+
+
             <footer></footer>
         <div>
     `;
@@ -95,6 +92,16 @@ const Nav = (rovers, roverImages) => {
 	}
 };
 
+const Main = (state) => {
+    const {roverImages, apod } = state;
+    console.log(roverImages);
+	if (roverImages.length > 0) {
+		return Slider(roverImages);
+	} else {
+		return ImageOfTheDay(apod)
+	}
+};
+
 //HOF that return other fn
 const Buttons = (rovers) => {
 	return rovers.map((rover) => generateElement(rover, Button));
@@ -117,7 +124,7 @@ const Img = (image) => {
 const Slider = (images) => {
     return (`
         <div id="slider">
-            ${Images(images)}
+            ${Images(images).join("")}
         </div>
     `)
 }
