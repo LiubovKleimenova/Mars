@@ -10,14 +10,8 @@ const port = 3000;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-//https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos  - to get latest images
-///manifests/rover_name - to get rovers data
-
 app.use("/", express.static(path.join(__dirname, "../public")));
 
-// your API calls
-
-// example API call
 app.get("/apod", async (req, res) => {
 	try {
 		let image = await fetch(

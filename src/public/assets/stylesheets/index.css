@@ -1,38 +1,70 @@
 /* -------------------  MOBILE  --------------------- */
 
 body {
-  display: flex;
-  flex-direction: column;
-  font-family: Arial;
   min-height: 100vh;
 }
 
 header {
-  /* header styles */
+	/* header styles */
 }
 
 main {
-  flex: 1;
-  padding: 20px;
+	position: relative;
 }
 
 footer {
-  /* footer styles */
+	/* footer styles */
+}
+
+.bg-space {
+  min-height: 100vh;
+  min-width: 100vw;
+
+  background-image: linear-gradient(0deg, rgba(234,210,206,0.17) 6%, rgba(139,125,141,0.35) 25%, rgba(0,1,46,0.70) 38%), url(./../images/space-bg-2.jpeg);
+  background-repeat: repeat;
+  background-size: cover;
+}
+
+.modal-wrapper {
+	background-color: rgba(0, 0, 0, 0.75);
+	z-index: 2;
+
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	outline: 0;
+}
+
+.apod-image {
+  display: block;
+  max-width: 100%;
+  max-height: 50vh;
+  margin: 30px auto;
+  object-fit: cover;
+  overflow: hidden;
+}
+
+form {
+	z-index: 5;
 }
 
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {
-  /* use mobile */
+	/* use mobile */
 }
 
 /* -------------------  DESKTOP  -------------------- */
 
 @media (min-width: 1224px) {
-  /* use mobile */
+	/* use mobile */
 }
 
 /* -------------------  LARGE SCREENS  -------------- */
 
 @media (min-width: 1824px) {
-  /* use mobile */
+	/* use mobile */
 }

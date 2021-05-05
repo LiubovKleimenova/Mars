@@ -1,5 +1,5 @@
 let store = {
-	user: { name: "Student" },
+	user: { name: "" },
 	apod: "",
 	rovers: ["Curiosity", "Opportunity", "Spirit"],
 	roverName: "",
@@ -23,20 +23,21 @@ const render = async (root, state) => {
 const App = (state) => {
 	console.log(state);
 	return `
-        <div class="bg-dark bg-space">
-            <header class="container">
-                <nav>
-                    ${Nav(state.rovers, state.roverImages)}
-                </nav>
-            </header>
-            <main class="container text-light">
-                ${Main(state)}
-            </main>
-
-
-            <footer></footer>
-        <div>
-    `;
+        <div class="bg-dark bg-space d-flex align-items-center">
+            <div class="container text-light">
+                <header class="text-center mb-4">
+                    <h4 class="m-0">${Greeting(state.user.name)}</h4>
+                    <div></div>
+                    ${Nav(state)}
+                </header>
+                <main class="text-light">
+                    ${Main(state)}
+                </main>
+                <footer></footer>
+            </div>
+        </div>
+        ${ModalForm(state)}
+        `;
 };
 
 // listening for load event because page should load before any JS is called
@@ -50,59 +51,62 @@ window.addEventListener("load", () => {
 const Greeting = (name) => {
 	if (name) {
 		return `
-            <h1>Welcome, ${name}!</h1>
+            <h1>Welcome to Space, ${name}!</h1>
         `;
 	}
 
 	return `
-        <h1>Hello!</h1>
+        <h1>Hello Stranger!</h1>
     `;
 };
 
-// Example of a pure function that renders infomation requested from the backend
+// Components
 const ImageOfTheDay = (apod) => {
 	// If image does not already exist, or it is not from today -- request it again
 	const today = new Date();
 	if (!apod || apod.image.date === today.getDate()) {
 		getImageOfTheDay(store);
-		console.log(1);
 	} else {
 		// check if the photo of the day is actually type video!
 		if (apod.media_type === "video") {
 			return `
                 <p>See today's featured video <a href="${apod.url}">here</a></p>
                 <p>${apod.title}</p>
-                <p>${apod.explanation}</p>
+                <p class="m-0">${apod.explanation}</p>
             `;
 		} else {
 			return `
-                <img src="${apod.image.url}" alt="${apod.image.title}" width="60%" />
+                <img src="${apod.image.url}" alt="${apod.image.title}" class="apod-image" />
                 <h2>${apod.image.title}</h2>
-                <p>${apod.image.explanation}</p>
+                <p class="m-0">${apod.image.explanation}</p>
             `;
 		}
 	}
 };
 
-const Nav = (rovers, roverImages) => {
-	if (roverImages.length > 0) {
-		return `<button onclick='clearRoverData()'>Back to Main Page</button>`;
+const Nav = (state) => {
+	if (state.roverImages.length > 0) {
+		return `<button onclick='clearRoverData()' class="btn btn-light">Back to the Image of the Day</button>`;
 	} else {
-		return Buttons(rovers).join("");
+		return `
+        <h5>Choose a rover to see its images</h5>
+        <nav>
+            ${Buttons(state.rovers).join("")}
+        </nav>
+        `;
 	}
 };
 
 const Main = (state) => {
-    const {roverImages, apod } = state;
-    console.log(roverImages);
+	const { roverImages, apod } = state;
+
 	if (roverImages.length > 0) {
 		return Slider(roverImages);
 	} else {
-		return ImageOfTheDay(apod)
+		return ImageOfTheDay(apod);
 	}
 };
 
-//HOF that return other fn
 const Buttons = (rovers) => {
 	return rovers.map((rover) => generateElement(rover, Button));
 };
@@ -114,33 +118,56 @@ const Button = (rover) => {
 };
 
 const Images = (images) => {
-    return images.map(image => generateElement(image, Img))
-}
+	return images.map((image) => generateElement(image, Img));
+};
 
 const Img = (image) => {
-    return `<img src="${image.img_src}" alt="Made with ${image.camera.full_name} at ${image.earth_date}"/>`
-}
+	return `<img src="${image.img_src}" alt="Made with ${image.camera.full_name} at ${image.earth_date}"/>`;
+};
 
 const Slider = (images) => {
-    return (`
+	return `
         <div id="slider">
             ${Images(images).join("")}
         </div>
-    `)
-}
+    `;
+};
 
-//HOF THAT takes callback fn
+const ModalForm = (state) => {
+	if (state.user.name) {
+		return ``;
+	}
+	return `
+     <div class="modal-wrapper fade show d-block">
+        <div class="modal-dialog-centered w-100 justify-content-center">
+                <form class="d-flex flex-column bg-light p-4" onsubmit="updateName(event)">
+                    <label for="name" class="">Enter Your Name</label>
+                    <input type="text" id="name" name="name" placeholder="Niel Armstrong" class="my-3" tabindex="1">
+                    <button type="Submit">Go to Space</button>
+                </form>
+        </div>
+    </div>   
+    `;
+};
+
 const generateElement = (data, callback) => {
 	return callback(data);
 };
 
+// callbacks for event listeners
 const updateRover = (rover) => {
-	getRoverImages(rover);
-	//getRoverDetails(rover);
+	getRoverData(rover);
 };
 
 const clearRoverData = () => {
 	updateStore(store, { roverImages: [], roverInfo: {} });
+};
+
+const updateName = (e) => {
+	e.preventDefault();
+	let user = { name: e.target.querySelector("#name").value };
+	
+		updateStore(store, { user });
 };
 
 // ------------------------------------------------------  API CALLS
@@ -152,7 +179,7 @@ const getImageOfTheDay = (state) => {
 		.then((apod) => updateStore(store, { apod }));
 };
 
-const getRoverImages = (name) => {
+const getRoverData = (name) => {
 	fetch(`http://localhost:3000/rover/${name}/images`)
 		.then((res) => {
 			return res.json();
@@ -166,12 +193,5 @@ const getRoverImages = (name) => {
 						roverInfo: roverInfo.photo_manifest,
 					})
 				);
-			//updateStore(store, { roverImages });
 		});
-};
-
-const getRoverDetails = (name) => {
-	fetch(`http://localhost:3000/rover/${name}/info`)
-		.then((res) => res.json())
-		.then((roverInfo) => updateStore(store, { roverInfo }));
 };
