@@ -212,7 +212,7 @@ const getRoverData = (name) => {
 			return res.json();
 		})
 		.then((roverImages) => {
-            console.log(roverImages)
+            console.log(roverImages.latest_photos)
 			fetch(`http://localhost:3000/rover/${name}/info`)
 				.then((res) => res.json())
 				.then((roverInfo) =>
