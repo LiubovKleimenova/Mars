@@ -3,7 +3,7 @@ let store = Immutable.Map({
 	apod: "",
 	rovers: ["Curiosity", "Opportunity", "Spirit"],
 	roverName: "", //delete?
-	roverImages: [],
+	roverImages: Immutable.List([]),
 	roverInfo: "",
 });
 
@@ -212,11 +212,12 @@ const getRoverData = (name) => {
 			return res.json();
 		})
 		.then((roverImages) => {
+            console.log(roverImages)
 			fetch(`http://localhost:3000/rover/${name}/info`)
 				.then((res) => res.json())
 				.then((roverInfo) =>
 					updateStore(store, {
-						roverImages,
+						roverImages: roverImages.latest_photos,
 						roverInfo: roverInfo.photo_manifest,
 					})
 				);
