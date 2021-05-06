@@ -19,7 +19,7 @@ const updateStore = (state, newState) => {
 const render = async (root, state) => {
 	root.innerHTML = App(state);
 
-    const roverImages = state.get('roverImages');
+    //const roverImages = state.get('roverImages');
     //let slider = document.getElementById('slider');
     // if (roverImages.length > 0) {
     //     //jquery needed for slider JS
@@ -37,13 +37,8 @@ const App = (state) => {
 	const apod = state.get('apod');
 	const rovers = state.get('rovers');
 	const roverImages = state.get('roverImages');
-    
 
-    console.log(state)
-    //console.log(state.getIn(['user']))
-    console.log(user)
-    //console.log(apod)
-    console.log(rovers)
+    //console.log(state)
     console.log(roverImages);
 	return `
         <div class="bg-dark bg-space d-flex align-items-center">
@@ -87,7 +82,6 @@ const ImageOfTheDay = (apod) => {
 	// If image does not already exist, or it is not from today -- request it again
 	const today = new Date();
 	if (!apod || apod.getIn(['image', 'date']) === today.getDate()) {
-	//if (!apod) {
 		getImageOfTheDay(store);
 	} else {
         const title = apod.getIn(["image", "title"]);
@@ -164,7 +158,6 @@ const Slider = (images) => {
 };
 
 const ModalForm = (user) => {
-    console.log(user);
 	if (user) {
 		return ``;
 	}
@@ -197,11 +190,7 @@ const clearRoverData = () => {
 const updateName = (e) => {
 	e.preventDefault();
 	let user = e.target.querySelector("#name").value ;
-    store = store.set('user', user)
-    //console.log('from upd name')
-    //console.log(newStore);
-	//updateStore(store, newStore);
-    //console.log(store)
+    store = store.set('user', user);
 
     render(root, store)
 };
