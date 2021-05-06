@@ -1,41 +1,50 @@
-let store = {
+let store = Immutable.Map({
 	user: "",
 	apod: "",
 	rovers: ["Curiosity", "Opportunity", "Spirit"],
 	roverName: "", //delete?
 	roverImages: [],
 	roverInfo: "",
-};
+});
 
 // add our markup to the page
 const root = document.getElementById("root");
 
 const updateStore = (state, newState) => {
-	state = Object.assign(state, newState);
+	//state = Object.assign(state, newState);
+	state = state.merge(newState);
 	render(root, state);
 };
 
 const render = async (root, state) => {
 	root.innerHTML = App(state);
 
-    const roverImages = state.roverImages;
+    const roverImages = state.get('roverImages');
     //let slider = document.getElementById('slider');
-    if (roverImages.length > 0) {
-        //jquery needed for slider JS
-        $('#slider').slick({
-            infinite: true,
-            slidesToShow: 1,
-            slidesToScroll:1
-        });
-    }
+    // if (roverImages.length > 0) {
+    //     //jquery needed for slider JS
+    //     $('#slider').slick({
+    //         infinite: true,
+    //         slidesToShow: 1,
+    //         slidesToScroll:1
+    //     });
+    // }
 };
 
 // create content
 const App = (state) => {
-	const user = state.user;
-	const apod = state.apod;
-	const rovers = state.rovers;
-	const roverImages = state.roverImages;
+	const user = state.get('user');
+	const apod = state.get('apod');
+	const rovers = state.get('rovers');
+	const roverImages = state.get('roverImages');
+    
+
+    console.log(state)
+    //console.log(state.getIn(['user']))
+    console.log(user)
+    //console.log(apod)
+    console.log(rovers)
+    console.log(roverImages);
 	return `
         <div class="bg-dark bg-space d-flex align-items-center">
             <div class="container text-light">
@@ -77,22 +86,27 @@ const Greeting = (name) => {
 const ImageOfTheDay = (apod) => {
 	// If image does not already exist, or it is not from today -- request it again
 	const today = new Date();
-	if (!apod || apod.image.date === today.getDate()) {
+	if (!apod || apod.getIn(['image', 'date']) === today.getDate()) {
+	//if (!apod) {
 		getImageOfTheDay(store);
 	} else {
+        const title = apod.getIn(["image", "title"]);
+        const explanation = apod.getIn(["image", "explanation"]);
+        const url = apod.getIn(["image", "url"]);
 		// check if the photo of the day is actually type video!
 		if (apod.media_type === "video") {
 			return `
-                <p>See today's featured video <a href="${apod.url}">here</a></p>
-                <p>${apod.title}</p>
-                <p class="m-0">${apod.explanation}</p>
+                <p>See today's featured video <a href="${url}">here</a></p>
+                <p>${title}</p>
+                <p class="m-0">${explanation}</p>
             `;
 		} else {
+			
 			return `
-                <h2 class="text-center mt-5">Photo of the Day: ${apod.image.title}</h2>
+                <h2 class="text-center mt-5">Photo of the Day: ${title}</h2>
                 <figure class="figure">
-                    <img src="${apod.image.url}" alt="${apod.image.title}" class="apod-image figure-img" />
-                    <figcaption class="figure-caption text-light">${apod.image.explanation}</figcaption>
+                    <img src="${url}" alt="${title}" class="apod-image figure-img" />
+                    <figcaption class="figure-caption text-light">${explanation}</figcaption>
                 </figure>
             `;
 		}
@@ -183,8 +197,13 @@ const clearRoverData = () => {
 const updateName = (e) => {
 	e.preventDefault();
 	let user = e.target.querySelector("#name").value ;
+    store = store.set('user', user)
+    //console.log('from upd name')
+    //console.log(newStore);
+	//updateStore(store, newStore);
+    //console.log(store)
 
-	updateStore(store, {user});
+    render(root, store)
 };
 
 // ------------------------------------------------------  API CALLS
@@ -193,7 +212,9 @@ const updateName = (e) => {
 const getImageOfTheDay = () => {
 	fetch(`http://localhost:3000/apod`)
 		.then((res) => res.json())
-		.then((apod) => updateStore(store, { apod }));
+		.then((apod) => 
+            updateStore(store, { apod })
+        );
 };
 
 const getRoverData = (name) => {
