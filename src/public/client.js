@@ -1,7 +1,7 @@
 let store = Immutable.Map({
 	user: "",
 	apod: "",
-	rovers: ["Curiosity", "Opportunity", "Spirit"],
+	rovers: Immutable.List(["Curiosity", "Opportunity", "Spirit"]),
 	roverName: "", //delete?
 	roverImages: Immutable.List([]),
 	roverInfo: "",
@@ -19,16 +19,16 @@ const updateStore = (state, newState) => {
 const render = async (root, state) => {
 	root.innerHTML = App(state);
 
-    //const roverImages = state.get('roverImages');
+    const roverImages = state.get('roverImages');
     //let slider = document.getElementById('slider');
-    // if (roverImages.length > 0) {
-    //     //jquery needed for slider JS
-    //     $('#slider').slick({
-    //         infinite: true,
-    //         slidesToShow: 1,
-    //         slidesToScroll:1
-    //     });
-    // }
+    if (roverImages.size > 0) {
+        //jquery for slider JS
+        $('#slider').slick({
+            infinite: true,
+            slidesToShow: 1,
+            slidesToScroll:1
+        });
+    }
 };
 
 // create content
