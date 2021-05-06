@@ -1,8 +1,8 @@
 let store = {
-	user: { name: "" },
+	user: "",
 	apod: "",
 	rovers: ["Curiosity", "Opportunity", "Spirit"],
-	roverName: "",
+	roverName: "", //delete?
 	roverImages: [],
 	roverInfo: "",
 };
@@ -18,8 +18,9 @@ const updateStore = (state, newState) => {
 const render = async (root, state) => {
 	root.innerHTML = App(state);
 
-    let slider = document.getElementById('slider');
-    if (slider) {
+    const roverImages = state.roverImages;
+    //let slider = document.getElementById('slider');
+    if (roverImages.length > 0) {
         //jquery needed for slider JS
         $('#slider').slick({
             infinite: true,
@@ -31,22 +32,25 @@ const render = async (root, state) => {
 
 // create content
 const App = (state) => {
-	console.log(state);
+	const user = state.user;
+	const apod = state.apod;
+	const rovers = state.rovers;
+	const roverImages = state.roverImages;
 	return `
         <div class="bg-dark bg-space d-flex align-items-center">
             <div class="container text-light">
                 <header class="text-center mb-4">
-                    <h4 class="m-0">${Greeting(state.user.name)}</h4>
+                    <h4 class="m-0">${Greeting(user)}</h4>
                     <div></div>
-                    ${Nav(state)}
+                    ${Nav(rovers, roverImages)}
                 </header>
                 <main class="text-light">
-                    ${Main(state)}
+                    ${Main(apod, roverImages)}
                 </main>
                 <footer></footer>
             </div>
         </div>
-        ${ModalForm(state)}
+        ${ModalForm(user)}
         `;
 };
 
@@ -57,7 +61,7 @@ window.addEventListener("load", () => {
 
 // ------------------------------------------------------  COMPONENTS
 
-// Pure function that renders conditional information -- THIS IS JUST AN EXAMPLE, you can delete it.
+// Pure functions for components
 const Greeting = (name) => {
 	if (name) {
 		return `
@@ -70,7 +74,6 @@ const Greeting = (name) => {
     `;
 };
 
-// Components
 const ImageOfTheDay = (apod) => {
 	// If image does not already exist, or it is not from today -- request it again
 	const today = new Date();
@@ -96,24 +99,25 @@ const ImageOfTheDay = (apod) => {
 	}
 };
 
-const Nav = (state) => {
-	if (state.roverImages.length > 0) {
+const Nav = (rovers, roverImages) => {
+	if (roverImages.length > 0) {
 		return `<button onclick='clearRoverData()' class="btn btn-light">Back to the Image of the Day</button>`;
 	} else {
 		return `
         <h5>Choose a rover to see images</h5>
         <nav>
-            ${Buttons(state.rovers).join("")}
+            ${Buttons(rovers).join("")}
         </nav>
         `;
 	}
 };
 
-const Main = (state) => {
-	const { roverImages, apod } = state;
-
+const Main = (apod, roverImages) => {
 	if (roverImages.length > 0) {
-		return Slider(roverImages);
+		return `
+            FACT
+            ${Slider(roverImages)}
+        `;
 	} else {
 		return ImageOfTheDay(apod);
 	}
@@ -145,8 +149,9 @@ const Slider = (images) => {
     `;
 };
 
-const ModalForm = (state) => {
-	if (state.user.name) {
+const ModalForm = (user) => {
+    console.log(user);
+	if (user) {
 		return ``;
 	}
 	return `
@@ -177,15 +182,15 @@ const clearRoverData = () => {
 
 const updateName = (e) => {
 	e.preventDefault();
-	let user = { name: e.target.querySelector("#name").value };
+	let user = e.target.querySelector("#name").value ;
 
-	updateStore(store, { user });
+	updateStore(store, {user});
 };
 
 // ------------------------------------------------------  API CALLS
 
 // Example API call
-const getImageOfTheDay = (state) => {
+const getImageOfTheDay = () => {
 	fetch(`http://localhost:3000/apod`)
 		.then((res) => res.json())
 		.then((apod) => updateStore(store, { apod }));
