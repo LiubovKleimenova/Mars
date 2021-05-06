@@ -108,7 +108,7 @@ const ImageOfTheDay = (apod) => {
 };
 
 const Nav = (rovers, roverImages) => {
-	if (roverImages.length > 0) {
+	if (roverImages.size > 0) {
 		return `<button onclick='clearRoverData()' class="btn btn-light">Back to the Image of the Day</button>`;
 	} else {
 		return `
@@ -121,7 +121,8 @@ const Nav = (rovers, roverImages) => {
 };
 
 const Main = (apod, roverImages) => {
-	if (roverImages.length > 0) {
+    console.log(roverImages)
+	if (roverImages.size > 0) {
 		return `
             FACT
             ${Slider(roverImages)}
@@ -146,7 +147,11 @@ const Images = (images) => {
 };
 
 const Img = (image) => {
-	return `<img src="${image.img_src}" alt="Made with ${image.camera.full_name} at ${image.earth_date}"/>`;
+    console.log(image)
+	return `<img src="${image.get("img_src")}" alt="Made with ${image.getIn([
+		"camera",
+		"full_name",
+	])} at ${image.get("earth_date")}"/>`;
 };
 
 const Slider = (images) => {
