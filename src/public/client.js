@@ -2,9 +2,8 @@ let store = Immutable.Map({
 	user: "",
 	apod: "",
 	rovers: Immutable.List(["Curiosity", "Opportunity", "Spirit"]),
-	roverName: "", //delete?
 	roverImages: Immutable.List([]),
-	roverInfo: "",
+    roverInfo: ""
 });
 
 // add our markup to the page
@@ -18,41 +17,37 @@ const updateStore = (state, newState) => {
 
 const render = async (root, state) => {
 	root.innerHTML = App(state);
-
-    const roverImages = state.get('roverImages');
-    //let slider = document.getElementById('slider');
-    if (roverImages.size > 0) {
-        //jquery for slider JS
-        $('#slider').slick({
-            infinite: true,
-            slidesToShow: 1,
-            slidesToScroll:1
-        });
-    }
+    
+	if (state.get("roverImages").size > 0) {
+		initSlider();
+	}
 };
 
 // create content
 const App = (state) => {
-	const user = state.get('user');
-	const apod = state.get('apod');
-	const rovers = state.get('rovers');
-	const roverImages = state.get('roverImages');
+	const user = state.get("user");
+	const apod = state.get("apod");
+	const rovers = state.get("rovers");
+	const roverImages = state.get("roverImages");
+	const roverInfo = state.get("roverInfo");
 
-    //console.log(state)
-    console.log(roverImages);
 	return `
-        <div class="bg-dark bg-space d-flex align-items-center">
-            <div class="container text-light">
-                <header class="text-center mb-4">
-                    <h4 class="m-0">${Greeting(user)}</h4>
-                    <div></div>
-                    ${Nav(rovers, roverImages)}
-                </header>
-                <main class="text-light">
-                    ${Main(apod, roverImages)}
-                </main>
-                <footer></footer>
+        <div class="bg-dark bg-space d-flex align-items-center position-relative">
+            <div class="bg-stars">
+                <div class="container text-light">
+                    <header class="text-center mb-4">
+                        <h4 class="m-0">${Greeting(user)}</h4>
+                        <div></div>
+                        ${Nav(rovers, roverImages)}
+                    </header>
+                    <main class="text-light">
+                        ${Main(apod, roverImages, roverInfo)}
+                    </main>
+                    <footer></footer>
+                </div>
+                ${Stars()}
             </div>
+
         </div>
         ${ModalForm(user)}
         `;
@@ -69,24 +64,24 @@ window.addEventListener("load", () => {
 const Greeting = (name) => {
 	if (name) {
 		return `
-            <h1>Welcome to Space, ${name}!</h1>
+            <h1 class="pt-5">Welcome to Space, ${name}!</h1>
         `;
 	}
 
 	return `
-        <h1>Hello Stranger!</h1>
+        <h1 class="pt-5">Hello Stranger!</h1>
     `;
 };
 
 const ImageOfTheDay = (apod) => {
 	// If image does not already exist, or it is not from today -- request it again
 	const today = new Date();
-	if (!apod || apod.getIn(['image', 'date']) === today.getDate()) {
+	if (!apod || apod.getIn(["image", "date"]) === today.getDate()) {
 		getImageOfTheDay(store);
 	} else {
-        const title = apod.getIn(["image", "title"]);
-        const explanation = apod.getIn(["image", "explanation"]);
-        const url = apod.getIn(["image", "url"]);
+		const title = apod.getIn(["image", "title"]);
+		const explanation = apod.getIn(["image", "explanation"]);
+		const url = apod.getIn(["image", "url"]);
 		// check if the photo of the day is actually type video!
 		if (apod.media_type === "video") {
 			return `
@@ -95,7 +90,6 @@ const ImageOfTheDay = (apod) => {
                 <p class="m-0">${explanation}</p>
             `;
 		} else {
-			
 			return `
                 <h2 class="text-center mt-5">Photo of the Day: ${title}</h2>
                 <figure class="figure">
@@ -120,12 +114,12 @@ const Nav = (rovers, roverImages) => {
 	}
 };
 
-const Main = (apod, roverImages) => {
-    console.log(roverImages)
+const Main = (apod, roverImages, roverInfo) => {
 	if (roverImages.size > 0) {
 		return `
-            FACT
+            ${Fact(roverInfo)}
             ${Slider(roverImages)}
+
         `;
 	} else {
 		return ImageOfTheDay(apod);
@@ -147,11 +141,26 @@ const Images = (images) => {
 };
 
 const Img = (image) => {
-    console.log(image)
-	return `<img src="${image.get("img_src")}" alt="Made with ${image.getIn([
+	return `
+    <div class="mx-2">
+        <img src="${image.get("img_src")}" alt="Made with ${image.getIn([
 		"camera",
 		"full_name",
-	])} at ${image.get("earth_date")}"/>`;
+	])} at ${image.get("earth_date")}"/>
+    </div>
+    `;
+};
+
+const Fact = (roverInfo) => {
+	return `
+    <div class="my-3 mx-3 mx-lg-5 px-lg-5">
+        These are the most recent photos taken by ${roverInfo.get("name")} 
+        that was launched at ${roverInfo.get("launch_date")}.
+        Rover landed at ${roverInfo.get("landing_date")} and since then 
+        spent ${roverInfo.get("max_sol")} sols on the surface 
+        of Mars and made ${roverInfo.get("total_photos")} photos.
+    </div>
+    `;
 };
 
 const Slider = (images) => {
@@ -161,6 +170,37 @@ const Slider = (images) => {
         </div>
     `;
 };
+
+const initSlider () => {
+    //Initializing Slider - jquery is required by the library
+		$("#slider").slick({
+			infinite: true,
+			slidesToShow: 3,
+			slidesToScroll: 1,
+			autoplay: true,
+			autoplaySpeed: 2000,
+			arrows: false,
+			pauseOnHover: false,
+			responsive: [
+				{
+					breakpoint: 980,
+					settings: {
+						slidesToShow: 2,
+						slidesToScroll: 2,
+						infinite: true,
+						dots: true,
+					},
+				},
+				{
+					breakpoint: 768,
+					settings: {
+						slidesToShow: 1,
+						slidesToScroll: 1,
+					},
+				}
+			],
+		});
+}
 
 const ModalForm = (user) => {
 	if (user) {
@@ -179,6 +219,17 @@ const ModalForm = (user) => {
     `;
 };
 
+const Stars = () => {
+	return `
+        <div class="shooting_star"></div>
+        <div class="shooting_star"></div>
+        <div class="shooting_star"></div>
+        <div class="shooting_star"></div>
+        <div class="shooting_star"></div>
+        <div class="shooting_star"></div>
+    `;
+};
+
 const generateElement = (data, callback) => {
 	return callback(data);
 };
@@ -194,10 +245,10 @@ const clearRoverData = () => {
 
 const updateName = (e) => {
 	e.preventDefault();
-	let user = e.target.querySelector("#name").value ;
-    store = store.set('user', user);
+	let user = e.target.querySelector("#name").value;
+	store = store.set("user", user);
 
-    render(root, store)
+	render(root, store);
 };
 
 // ------------------------------------------------------  API CALLS
@@ -206,9 +257,7 @@ const updateName = (e) => {
 const getImageOfTheDay = () => {
 	fetch(`http://localhost:3000/apod`)
 		.then((res) => res.json())
-		.then((apod) => 
-            updateStore(store, { apod })
-        );
+		.then((apod) => updateStore(store, { apod }));
 };
 
 const getRoverData = (name) => {
@@ -217,14 +266,13 @@ const getRoverData = (name) => {
 			return res.json();
 		})
 		.then((roverImages) => {
-            console.log(roverImages.latest_photos)
 			fetch(`http://localhost:3000/rover/${name}/info`)
 				.then((res) => res.json())
-				.then((roverInfo) =>
+				.then((roverInfo) => {
 					updateStore(store, {
 						roverImages: roverImages.latest_photos,
-						roverInfo: roverInfo.photo_manifest,
-					})
-				);
+						roverInfo: roverInfo,
+					});
+				});
 		});
 };
