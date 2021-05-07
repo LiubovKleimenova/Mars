@@ -86,8 +86,9 @@ form {
 	/* use mobile */
 }
 
-/* STARS ANIMATION */
-
+/* STARS ANIMATION taken from */
+/* https://codepen.io/YusukeNakaya/pen/XyOaBj */
+/* and compiled to css */
 .bg-stars {
   position: relative;
   width: 100%;

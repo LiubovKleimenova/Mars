@@ -159,6 +159,8 @@ const Fact = (roverInfo) => {
         Rover landed at ${roverInfo.get("landing_date")} and since then 
         spent ${roverInfo.get("max_sol")} sols on the surface 
         of Mars and made ${roverInfo.get("total_photos")} photos.
+
+        Current Project Status is ${roverInfo.get("status")}
     </div>
     `;
 };
@@ -171,7 +173,7 @@ const Slider = (images) => {
     `;
 };
 
-const initSlider () => {
+const initSlider = () => {
     //Initializing Slider - jquery is required by the library
 		$("#slider").slick({
 			infinite: true,
@@ -245,7 +247,7 @@ const clearRoverData = () => {
 
 const updateName = (e) => {
 	e.preventDefault();
-	let user = e.target.querySelector("#name").value;
+	const user = e.target.querySelector("#name").value;
 	store = store.set("user", user);
 
 	render(root, store);
